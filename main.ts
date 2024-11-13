@@ -1,3 +1,49 @@
+namespace SpriteKind {
+    export const Cannon = SpriteKind.create()
+    export const enemybullet = SpriteKind.create()
+}
+function spawnCannon () {
+    CannonX = [
+    25,
+    60,
+    95,
+    130
+    ]
+    for (let index = 0; index <= 3; index++) {
+        starShip = sprites.create(img`
+            . . . . . . . . . . . . . . . . 
+            . . . . . . . . . . . . . . . . 
+            . . . . . . . . . . . . . . . . 
+            . . . . . . . . . . . . . . . . 
+            . . . . . . . . . . . . . . . . 
+            . . . . . . . . . . . . . . . . 
+            . . . . 7 7 7 7 7 7 7 7 . . . . 
+            . . 7 7 7 7 7 7 7 7 7 7 7 7 . . 
+            . 7 7 7 7 7 7 7 7 7 7 7 7 7 7 . 
+            . 7 7 7 7 7 7 7 7 7 7 7 7 7 7 . 
+            . 7 7 7 7 7 7 7 7 7 7 7 7 7 7 . 
+            . 7 7 7 7 7 7 7 7 7 7 7 7 7 7 . 
+            . 7 7 7 7 7 7 7 7 7 7 7 7 7 7 . 
+            . 7 7 7 7 7 7 . . 7 7 7 7 7 7 . 
+            . 7 7 7 7 7 7 . . 7 7 7 7 7 7 . 
+            . 7 7 7 7 7 . . . . 7 7 7 7 7 . 
+            `, SpriteKind.Cannon)
+        starShip.setPosition(CannonX[index], 95)
+    }
+}
+sprites.onOverlap(SpriteKind.Projectile, SpriteKind.Food, function (sprite, otherSprite) {
+    sprites.destroy(sprite)
+    sprites.destroy(otherSprite)
+    info.changeScoreBy(250)
+    hero.startEffect(effects.confetti)
+})
+sprites.onOverlap(SpriteKind.enemybullet, SpriteKind.Cannon, function (sprite, otherSprite) {
+    sprites.destroy(sprite)
+    CannonHealth += -1
+    if (CannonHealth == 0) {
+        game.gameOver(false)
+    }
+})
 controller.A.onEvent(ControllerButtonEvent.Pressed, function () {
     boulet = sprites.createProjectileFromSprite(img`
         . . . . . . . . . . . . . . . . 
@@ -19,6 +65,55 @@ controller.A.onEvent(ControllerButtonEvent.Pressed, function () {
         `, hero, 0, -200)
     boulet.setScale(0.4, ScaleAnchor.Middle)
 })
+sprites.onOverlap(SpriteKind.enemybullet, SpriteKind.Projectile, function (sprite, otherSprite) {
+    sprites.destroy(sprite)
+    sprites.destroy(otherSprite)
+})
+function setDifficulty () {
+    Difficulty = game.askForNumber("Set Difficulty!", 1)
+    if (Difficulty == 1) {
+        Xvel = Xvel * 0.5
+        CannonHealth = 50
+    }
+    if (Difficulty == 2) {
+        Xvel = Xvel
+        CannonHealth = 25
+    }
+    if (Difficulty == 3) {
+        Xvel = Xvel * 1.5
+        CannonHealth = 10
+    }
+    if (Difficulty >= 4) {
+        game.splash("Invalid number. Try again!")
+        setDifficulty()
+    }
+    if (Difficulty <= 0) {
+        game.splash("Invalid number. Try again!")
+        setDifficulty()
+    }
+}
+function enemyBullet () {
+    bizarro = sprites.create(img`
+        . . . . . . . . . . . . . . . . 
+        . . . . . . . 8 1 8 . . . . . . 
+        . . . . . . . 8 1 8 . . . . . . 
+        . . . . . . . 8 1 8 . . . . . . 
+        . . . . . . . 9 1 9 . . . . . . 
+        . . . . . . 8 9 1 9 8 . . . . . 
+        . . . . . . 8 1 1 1 8 . . . . . 
+        . . . . . . 8 1 1 1 9 . . . . . 
+        . . . . . . 9 1 1 1 9 . . . . . 
+        . . . . . . 9 1 1 1 9 . . . . . 
+        . . . . . . 9 1 1 1 9 . . . . . 
+        . . . . . . 8 9 1 9 8 . . . . . 
+        . . . . . . . 8 8 8 . . . . . . 
+        . . . . . . . . . . . . . . . . 
+        . . . . . . . . . . . . . . . . 
+        . . . . . . . . . . . . . . . . 
+        `, SpriteKind.enemybullet)
+    bizarro.setPosition(randint(1, 151), 5)
+    bizarro.setVelocity(0, 50)
+}
 function spawnHero () {
     hero = sprites.create(img`
         . . . . . . . . . . . . . . . . . 
@@ -42,70 +137,155 @@ function spawnHero () {
     hero.setScale(0.5, ScaleAnchor.Middle)
     hero.setPosition(79, 105)
 }
-function spawnEnemy (Xposition: number, Yposition: number) {
-    Xposition = Xposition
-    Yposition = Yposition
-    for (let index = 0; index <= 10; index++) {
-        enemySprite = sprites.create(img`
-            . . . . . . . . . . . 
-            . . 7 . . . . . 7 . . 
-            . . . 7 . . . 7 . . . 
-            . . 7 7 7 7 7 7 7 . . 
-            . 7 7 . 7 7 7 . 7 7 . 
-            7 7 7 7 7 7 7 7 7 7 7 
-            7 . 7 7 7 7 7 7 7 . 7 
-            7 . 7 . . . . . 7 . 7 
-            . . . 7 7 . 7 7 . . . 
-            `, SpriteKind.Enemy)
-        enemySprite.setPosition(Xposition, Yposition)
-        enemySprite.setVelocity(50, 0)
-        enemySprite.setBounceOnWall(true)
-        Xposition += 15
+sprites.onOverlap(SpriteKind.Projectile, SpriteKind.Cannon, function (sprite, otherSprite) {
+    CannonHealth += -1
+    if (CannonHealth == 0) {
+        game.gameOver(false)
     }
-    Yposition += 15
-    Xposition = Xposition
-    for (let index = 0; index <= 10; index++) {
-        enemySprite = sprites.create(img`
-            . . . . . . . . . . . 
-            . . 7 . . . . . 7 . . 
-            . . . 7 . . . 7 . . . 
-            . . 7 7 7 7 7 7 7 . . 
-            . 7 7 . 7 7 7 . 7 7 . 
-            7 7 7 7 7 7 7 7 7 7 7 
-            7 . 7 7 7 7 7 7 7 . 7 
-            7 . 7 . . . . . 7 . 7 
-            . . . 7 7 . 7 7 . . . 
-            `, SpriteKind.Enemy)
-        enemySprite.setPosition(Xposition, Yposition)
-        enemySprite.setVelocity(50, 0)
-        enemySprite.setBounceOnWall(true)
-        Xposition += 15
+})
+function spawnEnemy (Xpo: number, Ypo: number) {
+    Xposition = Xpo
+    Yposition = Ypo
+    for (let index = 0; index < 4; index++) {
+        for (let index3 = 0; index3 <= 8; index3++) {
+            enemySprite = sprites.create(img`
+                . . . . . . . . . . . 
+                . . 7 . . . . . 7 . . 
+                . . . 7 . . . 7 . . . 
+                . . 7 7 7 7 7 7 7 . . 
+                . 7 7 . 7 7 7 . 7 7 . 
+                7 7 7 7 7 7 7 7 7 7 7 
+                7 . 7 7 7 7 7 7 7 . 7 
+                7 . 7 . . . . . 7 . 7 
+                . . . 7 7 . 7 7 . . . 
+                `, SpriteKind.Enemy)
+            enemySprite.setPosition(Xposition, Yposition)
+            enemySprite.setBounceOnWall(true)
+            Xposition += 15
+            animation.runImageAnimation(
+            enemySprite,
+            [img`
+                . . . . . . . . . . . 
+                . . 7 . . . . . 7 . . 
+                . . . 7 . . . 7 . . . 
+                . . 7 7 7 7 7 7 7 . . 
+                . 7 7 . 7 7 7 . 7 7 . 
+                7 7 7 7 7 7 7 7 7 7 7 
+                7 . 7 7 7 7 7 7 7 . 7 
+                7 . 7 . . . . . 7 . 7 
+                . . . 7 7 . 7 7 . . . 
+                `,img`
+                . . . . . . . . . . . 
+                . . 7 . . . . . 7 . . 
+                . . . 7 . . . 7 . . . 
+                7 . 7 7 7 7 7 7 7 . 7 
+                7 7 7 . 7 7 7 . 7 7 7 
+                7 7 7 7 7 7 7 7 7 7 7 
+                . . 7 7 7 7 7 7 7 . . 
+                . . 7 . . . . . 7 . . 
+                . . . 7 7 . 7 7 . . . 
+                `,img`
+                . . . . . . . . . . . 
+                . . 7 . . . . . 7 . . 
+                . . . 7 . . . 7 . . . 
+                7 . 7 7 7 7 7 7 7 . . 
+                7 7 7 . 7 7 7 . 7 7 . 
+                7 7 7 7 7 7 7 7 7 7 7 
+                . . 7 7 7 7 7 7 7 . 7 
+                . . 7 . . . . . 7 . 7 
+                . . . 7 7 . 7 7 . . . 
+                `,img`
+                . . . . . . . . . . . 
+                . . 7 . . . . . 7 . . 
+                . . . 7 . . . 7 . . . 
+                . . 7 7 7 7 7 7 7 . 7 
+                . 7 7 . 7 7 7 . 7 7 7 
+                7 7 7 7 7 7 7 7 7 7 7 
+                7 . 7 7 7 7 7 7 7 . . 
+                7 . 7 . . . . . 7 . . 
+                . . . 7 7 . 7 7 . . . 
+                `,img`
+                . . . . . . . . . . . 
+                . . 7 . . . . . 7 . . 
+                . . . 7 . . . 7 . . . 
+                7 . 7 7 7 7 7 7 7 . . 
+                7 7 7 . 7 7 7 . 7 7 . 
+                7 7 7 7 7 7 7 7 7 7 7 
+                . . 7 7 7 7 7 7 7 . 7 
+                . . 7 . . . . . 7 . 7 
+                . . . 7 7 . 7 7 . . . 
+                `,img`
+                . . . . . . . . . . . 
+                . . 7 . . . . . 7 . . 
+                . . . 7 . . . 7 . . . 
+                . . 7 7 7 7 7 7 7 . 7 
+                . 7 7 . 7 7 7 . 7 7 7 
+                7 7 7 7 7 7 7 7 7 7 7 
+                7 . 7 7 7 7 7 7 7 . . 
+                7 . 7 . . . . . 7 . . 
+                . . . 7 7 . 7 7 . . . 
+                `,img`
+                . . . . . . . . . . . 
+                . . 7 . . . . . 7 . . 
+                . . . 7 . . . 7 . . . 
+                . . 7 7 7 7 7 7 7 . . 
+                . 7 7 . 7 7 7 . 7 7 . 
+                7 7 7 7 7 7 7 7 7 7 7 
+                7 . 7 7 7 7 7 7 7 . 7 
+                7 . 7 . . . . . 7 . 7 
+                . . . 7 7 . 7 7 . . . 
+                `],
+            500,
+            true
+            )
+        }
+        Yposition += 15
+        Xposition = Xpo
     }
-    Yposition += 15
-    Xposition = Xposition
-    for (let index = 0; index <= 10; index++) {
-        enemySprite = sprites.create(img`
-            . . . . . . . . . . . 
-            . . 7 . . . . . 7 . . 
-            . . . 7 . . . 7 . . . 
-            . . 7 7 7 7 7 7 7 . . 
-            . 7 7 . 7 7 7 . 7 7 . 
-            7 7 7 7 7 7 7 7 7 7 7 
-            7 . 7 7 7 7 7 7 7 . 7 
-            7 . 7 . . . . . 7 . 7 
-            . . . 7 7 . 7 7 . . . 
-            `, SpriteKind.Enemy)
-        enemySprite.setPosition(Xposition, Yposition)
-        enemySprite.setVelocity(50, 0)
-        enemySprite.setBounceOnWall(true)
-        Xposition += 15
+    for (let value of sprites.allOfKind(SpriteKind.Enemy)) {
+        value.setVelocity(Xvel, 0)
     }
 }
+sprites.onOverlap(SpriteKind.enemybullet, SpriteKind.Player, function (sprite, otherSprite) {
+    sprites.destroy(sprite)
+    info.changeLifeBy(-1)
+})
+sprites.onOverlap(SpriteKind.Projectile, SpriteKind.Enemy, function (sprite, otherSprite) {
+    sprites.destroy(sprite)
+    sprites.destroy(otherSprite)
+    info.changeScoreBy(1)
+    hero.startEffect(effects.spray)
+})
+function spawnUFO () {
+    spawnTime = game.runtime()
+    UFO = sprites.create(img`
+        . . . . . 7 7 7 7 7 7 . . . . . 
+        . . . 7 7 7 7 7 7 7 7 7 7 . . . 
+        . . 7 7 7 7 7 7 7 7 7 7 7 7 . . 
+        . 7 7 . 7 7 . 7 7 . 7 7 . 7 7 . 
+        7 7 7 7 7 7 7 7 7 7 7 7 7 7 7 7 
+        . . 7 7 7 . . 7 7 . . 7 7 7 . . 
+        . . . 7 . . . . . . . . 7 . . . 
+        `, SpriteKind.Food)
+    UFO.setVelocity(Xvel * 3, 0)
+    UFO.setPosition(0, 60)
+    UFO.setBounceOnWall(true)
+}
+let UFO: Sprite = null
+let spawnTime = 0
 let enemySprite: Sprite = null
 let Yposition = 0
 let Xposition = 0
-let hero: Sprite = null
+let bizarro: Sprite = null
+let Difficulty = 0
 let boulet: Sprite = null
+let CannonHealth = 0
+let hero: Sprite = null
+let starShip: Sprite = null
+let CannonX: number[] = []
+let Xvel = 0
+Xvel = 50
+setDifficulty()
 scene.setBackgroundImage(img`
     ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff
     ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff
@@ -230,9 +410,11 @@ scene.setBackgroundImage(img`
     `)
 spawnHero()
 spawnEnemy(1, 1)
-game.onUpdate(function () {
-	
+spawnCannon()
+info.setLife(3)
+game.onUpdateInterval(15000, function () {
+    spawnUFO()
 })
-game.onUpdateInterval(500, function () {
-    Yposition += 5
+game.onUpdateInterval(2000, function () {
+    enemyBullet()
 })
